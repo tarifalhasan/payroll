@@ -1,73 +1,80 @@
 "use client";
 
-import React, { useState } from "react";
-import { FaExclamationCircle } from "react-icons/fa";
+import {
+  FaCheckCircle,
+  FaChevronLeft,
+  FaChevronRight,
+  FaExclamationCircle,
+} from "react-icons/fa";
 import { Alert } from "../ui/Alert";
 import { Button } from "../ui/Button";
-import MonthSwitcher from "../ui/DateFns";
 import { Table, TableCell, TableRow } from "../ui/Table";
-import { Tooltip } from "../ui/Tooltip";
 
-interface Employee {
+// ... (previous imports)
+
+interface RowData {
+  [key: string]: string | number | { name: string; title: string };
+}
+interface EmployeeData {
   name: string;
   title: string;
 }
-
-interface PayrollData {
-  employees: Employee;
-  errorCount?: number;
-  salaryType: string;
-  baseSalary: string;
+interface GenericData {
+  rows: Array<{
+    employee: EmployeeData;
+    jobs: number;
+    projectType: string;
+    price: string;
+  }>;
+  columns: string[];
 }
 
-interface PayrollApprovalProps {
-  month?: string;
-  year?: number;
-  data: PayrollData[];
-  approvalText?: string;
+interface PayrollApprovalProps<T extends string[] = string[]> {
+  month: string;
+  year: number;
+  data: GenericData;
   errorFixMessage?: string;
   periodMessage?: string;
-  approveButtonLabel?: string;
-  employeeColumnLabel?: string;
-  errorColumnLabel?: string;
-  salaryTypeColumnLabel?: string;
-  baseSalaryColumnLabel?: string;
+  approveButtonLabel: string;
+  columnLabels?: T;
+  errorFixMessageType: "destructive" | "success";
 }
 
-const PayrollApproval: React.FC<PayrollApprovalProps> = ({
+const PayrollApproval = <T extends string[] = string[]>({
   month,
+
   year,
   data,
-  approvalText = "Approve payroll",
-  errorFixMessage = "Fix errors in employee data to approve this period's payroll.",
-  periodMessage = "Period pending approval before 25 Nov 2023",
-  approveButtonLabel = "Approve payroll",
-  employeeColumnLabel = "Employees",
-  errorColumnLabel = "Errors",
-  salaryTypeColumnLabel = "Salary Type",
-  baseSalaryColumnLabel = "Base Salary",
-}) => {
-  const currentDate = new Date();
-  const initialDate = new Date(currentDate.getFullYear(), 4); // May is represented by index 4
-  const [selectedDate, setSelectedDate] = useState<Date | null>(initialDate);
-
-  const handleDateChange = (date: Date | null) => {
-    setSelectedDate(date);
-    // Handle other logic related to date change if needed
-  };
-
+  errorFixMessage,
+  periodMessage,
+  approveButtonLabel,
+  columnLabels = [] as unknown as T,
+  errorFixMessageType,
+}: PayrollApprovalProps<T>) => {
   return (
-    <div className=" bg-gray-100 p-8">
+    <div className="bg-gray-100 p-8">
       <div className="bg-white shadow rounded-lg p-6">
-        <div className="flex items-center justify-between pb-4 border-b">
-          <MonthSwitcher
-            initialSelectedDate={selectedDate || undefined}
-            onDateChange={handleDateChange}
-          />
+        <div className="flex flex-wrap gap-5 items-center justify-between pb-4 border-b">
+          <div className="flex items-center">
+            <button>
+              <FaChevronLeft />
+            </button>
+            <button>
+              <FaChevronRight />
+            </button>
+            <span className="font-semibold text-lg ml-4">
+              {month} {year}
+            </span>
+          </div>
           <div>
-            <Alert variant={"destructive"}>
-              <div className=" inline-flex items-center gap-1">
-                <FaExclamationCircle /> {errorFixMessage}
+            <Alert variant={errorFixMessageType}>
+              <div className="inline-flex items-center gap-1">
+                {errorFixMessageType === "destructive" ? (
+                  <FaExclamationCircle />
+                ) : (
+                  <FaCheckCircle />
+                )}{" "}
+                {errorFixMessage}
               </div>
             </Alert>
           </div>
@@ -80,47 +87,39 @@ const PayrollApproval: React.FC<PayrollApprovalProps> = ({
           <Table>
             <thead className="bg-gray-200 text-black">
               <TableRow>
-                <TableCell className="w-1/3 font-semibold text-sm">
-                  {employeeColumnLabel}
-                </TableCell>
-                <TableCell className="w-1/6 vertical-divider">
-                  {errorColumnLabel}
-                </TableCell>
-                <TableCell className="w-1/4 font-semibold text-sm">
-                  {salaryTypeColumnLabel}
-                </TableCell>
-                <TableCell className="w-1/4 font-semibold text-sm">
-                  {baseSalaryColumnLabel}
-                </TableCell>
+                {data.columns.map((label, index) => (
+                  <TableCell
+                    key={index}
+                    className={`w-1/${columnLabels.length} font-semibold text-sm`}
+                  >
+                    {label}
+                  </TableCell>
+                ))}
               </TableRow>
             </thead>
             <tbody className="text-gray-700">
-              {data.map((row, index) => (
+              {data.rows.map((row, rowIndex) => (
                 <TableRow
-                  key={index}
-                  className={index % 2 === 0 ? "bg-gray-50" : ""}
+                  key={rowIndex}
+                  className={rowIndex % 2 === 0 ? "bg-gray-50" : ""}
                 >
                   <TableCell>
                     <div>
-                      <p className=" font-medium">{row.employees.name}</p>
-                      <p className="text-sm text-gray-500">
-                        {row.employees.title}
+                      <p className=" font-semibold">{row.employee.name}</p>
+                      <p className=" text-sm font-normal">
+                        {row.employee.title}
                       </p>
                     </div>
                   </TableCell>
-                  <TableCell className="border-r border-[#e5e7eb] ">
-                    <Tooltip text={errorColumnLabel}>
-                      {row.errorCount !== undefined ? (
-                        <span className="error-indicator">
-                          {row.errorCount}
-                        </span>
-                      ) : (
-                        ""
-                      )}
-                    </Tooltip>
+                  <TableCell>
+                    <p>{row.jobs}</p>
                   </TableCell>
-                  <TableCell>{row.salaryType}</TableCell>
-                  <TableCell>{row.baseSalary}</TableCell>
+                  <TableCell>
+                    <p>{row.projectType}</p>
+                  </TableCell>
+                  <TableCell>
+                    <p>{row.price}</p>
+                  </TableCell>
                 </TableRow>
               ))}
             </tbody>
