@@ -13,23 +13,39 @@ interface Employee {
   title: string;
 }
 
-export interface PayrollData {
+interface PayrollData {
   employees: Employee;
   errorCount?: number;
   salaryType: string;
   baseSalary: string;
 }
 
-export interface PayrollApprovalProps {
+interface PayrollApprovalProps {
   month?: string;
   year?: number;
   data: PayrollData[];
+  approvalText?: string;
+  errorFixMessage?: string;
+  periodMessage?: string;
+  approveButtonLabel?: string;
+  employeeColumnLabel?: string;
+  errorColumnLabel?: string;
+  salaryTypeColumnLabel?: string;
+  baseSalaryColumnLabel?: string;
 }
 
 const PayrollApproval: React.FC<PayrollApprovalProps> = ({
   month,
   year,
   data,
+  approvalText = "Approve payroll",
+  errorFixMessage = "Fix errors in employee data to approve this period's payroll.",
+  periodMessage = "Period pending approval before 25 Nov 2023",
+  approveButtonLabel = "Approve payroll",
+  employeeColumnLabel = "Employees",
+  errorColumnLabel = "Errors",
+  salaryTypeColumnLabel = "Salary Type",
+  baseSalaryColumnLabel = "Base Salary",
 }) => {
   const currentDate = new Date();
   const initialDate = new Date(currentDate.getFullYear(), 4); // May is represented by index 4
@@ -39,6 +55,7 @@ const PayrollApproval: React.FC<PayrollApprovalProps> = ({
     setSelectedDate(date);
     // Handle other logic related to date change if needed
   };
+
   return (
     <div className=" bg-gray-100 p-8">
       <div className="bg-white shadow rounded-lg p-6">
@@ -50,29 +67,30 @@ const PayrollApproval: React.FC<PayrollApprovalProps> = ({
           <div>
             <Alert variant={"destructive"}>
               <div className=" inline-flex items-center gap-1">
-                <FaExclamationCircle /> Fix errors in employee data to approve
-                this subcompany&apos;s payroll period.
+                <FaExclamationCircle /> {errorFixMessage}
               </div>
             </Alert>
           </div>
-          <Button>Approve payroll</Button>
+          <Button variant={"primary"}>{approveButtonLabel}</Button>
         </div>
         <div className="text-sm font-semibold text-gray-600 py-4">
-          Period pending approval before 25 Nov 2023
+          {periodMessage}
         </div>
         <div className="overflow-x-auto mt-6">
           <Table>
             <thead className="bg-gray-200 text-black">
               <TableRow>
                 <TableCell className="w-1/3 font-semibold text-sm">
-                  Employees
+                  {employeeColumnLabel}
                 </TableCell>
-                <TableCell className="w-1/6 vertical-divider">Errors</TableCell>
-                <TableCell className="w-1/4 font-semibold text-sm">
-                  Salary type
+                <TableCell className="w-1/6 vertical-divider">
+                  {errorColumnLabel}
                 </TableCell>
                 <TableCell className="w-1/4 font-semibold text-sm">
-                  Base salary
+                  {salaryTypeColumnLabel}
+                </TableCell>
+                <TableCell className="w-1/4 font-semibold text-sm">
+                  {baseSalaryColumnLabel}
                 </TableCell>
               </TableRow>
             </thead>
@@ -91,7 +109,7 @@ const PayrollApproval: React.FC<PayrollApprovalProps> = ({
                     </div>
                   </TableCell>
                   <TableCell className="border-r border-[#e5e7eb] ">
-                    <Tooltip text="Error">
+                    <Tooltip text={errorColumnLabel}>
                       {row.errorCount !== undefined ? (
                         <span className="error-indicator">
                           {row.errorCount}
