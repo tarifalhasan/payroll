@@ -10,45 +10,44 @@ import { Alert } from "../ui/Alert";
 import { Button } from "../ui/Button";
 import { Table, TableCell, TableRow } from "../ui/Table";
 
-// ... (previous imports)
-
-interface RowData {
-  [key: string]: string | number | { name: string; title: string };
-}
 interface EmployeeData {
   name: string;
   title: string;
 }
-interface GenericData {
+
+interface GenericData<T extends string[]> {
   rows: Array<{
     employee: EmployeeData;
     jobs: number;
     projectType: string;
     price: string;
   }>;
-  columns: string[];
+  columns: T;
+  attributeDefinitions: {
+    [key in T[number]]: {
+      type: "string" | "number";
+      description: string;
+    };
+  };
 }
 
 interface PayrollApprovalProps<T extends string[] = string[]> {
   month: string;
   year: number;
-  data: GenericData;
+  data: GenericData<T>;
   errorFixMessage?: string;
   periodMessage?: string;
   approveButtonLabel: string;
-  columnLabels?: T;
   errorFixMessageType: "destructive" | "success";
 }
 
 const PayrollApproval = <T extends string[] = string[]>({
   month,
-
   year,
   data,
   errorFixMessage,
   periodMessage,
   approveButtonLabel,
-  columnLabels = [] as unknown as T,
   errorFixMessageType,
 }: PayrollApprovalProps<T>) => {
   return (
@@ -90,7 +89,7 @@ const PayrollApproval = <T extends string[] = string[]>({
                 {data.columns.map((label, index) => (
                   <TableCell
                     key={index}
-                    className={`w-1/${columnLabels.length} font-semibold text-sm`}
+                    className={`w-1/${data.columns.length} font-semibold text-sm`}
                   >
                     {label}
                   </TableCell>

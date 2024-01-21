@@ -9,7 +9,7 @@ export default function Home() {
         data={{
           rows: [
             {
-              employee: { name: "Alena Jacobs   ", title: "Product Designer" },
+              employee: { name: "Alena Jacobs", title: "Product Designer" },
               jobs: 15,
               projectType: "Construction",
               price: "$30,000.00",
@@ -22,6 +22,21 @@ export default function Home() {
             },
           ],
           columns: ["Employees", "Jobs", "Project Type", "Price"],
+          attributeDefinitions: {
+            jobs: {
+              type: "number",
+              description: "Number of jobs",
+            },
+            projectType: {
+              type: "string",
+              description: "Type of the project",
+            },
+            price: {
+              type: "string",
+              description: "Price of the project",
+            },
+            // ... definitions for other attributes
+          },
         }}
         errorFixMessage="Fix errors in company data to approve this period's orders."
         errorFixMessageType="destructive"
